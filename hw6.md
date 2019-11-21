@@ -332,16 +332,84 @@ weather_df =
   dplyr::select(name, id, everything())
 ```
 
-    ## Registered S3 method overwritten by 'crul':
-    ##   method                 from
-    ##   as.character.form_file httr
-
-    ## Registered S3 method overwritten by 'hoardr':
-    ##   method           from
-    ##   print.cache_info httr
-
     ## file path:          /Users/hannahbowlin/Library/Caches/rnoaa/ghcnd/USW00094728.dly
 
     ## file last updated:  2019-09-26 10:22:50
 
     ## file min/max dates: 1869-01-01 / 2019-09-30
+
+``` r
+# creating function to bootstrap
+
+lm(tmax ~ tmin, data = weather_df) %>%
+  broom::glance()
+```
+
+    ## # A tibble: 1 x 11
+    ##   r.squared adj.r.squared sigma statistic   p.value    df logLik   AIC
+    ##       <dbl>         <dbl> <dbl>     <dbl>     <dbl> <int>  <dbl> <dbl>
+    ## 1     0.912         0.911  2.94     3741. 2.98e-193     2  -910. 1827.
+    ## # … with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+
+``` r
+# drawing bootstrap samples with r^2
+rsq_df =  
+  weather_df %>%
+  modelr::bootstrap(n = 5000) %>%
+    mutate(
+      models = map(strap, ~lm(tmax ~ tmin, data = .x) ),
+      results = map(models, broom::glance)) %>%
+  dplyr::select(results) %>%
+  unnest(results)
+  
+# drawing bootstrap samples with log beta0*beta1
+## pivoted wider and mutated to create the log(beta0*beta1) variable by multiplying intercept and tmin together
+
+betas_df = 
+  weather_df %>%
+  modelr::bootstrap(n = 5000) %>%
+  mutate(
+    models = map(strap, ~lm(tmax ~ tmin, data = .x) ),
+    results = map(models, broom::tidy)) %>%
+  dplyr::select(results, .id) %>%
+  unnest(results) %>%
+  dplyr::select(.id, estimate, term) %>%
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate") %>%
+  janitor::clean_names() %>%
+  mutate(log_beta = log(intercept*tmin))
+
+betas_df
+```
+
+    ## # A tibble: 5,000 x 4
+    ##    id    intercept  tmin log_beta
+    ##    <chr>     <dbl> <dbl>    <dbl>
+    ##  1 0001       7.67  1.01     2.05
+    ##  2 0002       6.92  1.06     1.99
+    ##  3 0003       7.02  1.05     2.00
+    ##  4 0004       7.45  1.02     2.03
+    ##  5 0005       6.90  1.06     1.99
+    ##  6 0006       7.26  1.05     2.03
+    ##  7 0007       7.18  1.04     2.01
+    ##  8 0008       7.55  1.01     2.04
+    ##  9 0009       7.16  1.05     2.02
+    ## 10 0010       7.19  1.05     2.02
+    ## # … with 4,990 more rows
+
+``` r
+# graph of log_beta 
+
+logbeta_graph = 
+  ggplot(betas_df, aes(x = log_beta, color = log_beta)) +
+  geom_density() 
+
+logbeta_graph
+```
+
+<img src="hw6_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+
+``` r
+# finding 2.5% and 97.5% quantiles
+```

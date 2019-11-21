@@ -9,6 +9,8 @@ library(MASS)
 library(modelr)
 library(mgcv)
 library(leaps)
+library(p8105.datasets)
+library(rnoaa)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -150,8 +152,51 @@ weather_df =
     tmax = tmax / 10) %>%
   dplyr::select(name, id, everything())
 
+# creating function to bootstrap
+
+lm(tmax ~ tmin, data = weather_df) %>%
+  broom::glance()
 
 
+# drawing bootstrap samples with r^2
+rsq_df =  
+  weather_df %>%
+  modelr::bootstrap(n = 5000) %>%
+    mutate(
+      models = map(strap, ~lm(tmax ~ tmin, data = .x) ),
+      results = map(models, broom::glance)) %>%
+  dplyr::select(results) %>%
+  unnest(results)
+  
+# drawing bootstrap samples with log beta0*beta1
+## pivoted wider and mutated to create the log(beta0*beta1) variable by multiplying intercept and tmin together
+
+betas_df = 
+  weather_df %>%
+  modelr::bootstrap(n = 5000) %>%
+  mutate(
+    models = map(strap, ~lm(tmax ~ tmin, data = .x) ),
+    results = map(models, broom::tidy)) %>%
+  dplyr::select(results, .id) %>%
+  unnest(results) %>%
+  dplyr::select(.id, estimate, term) %>%
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate") %>%
+  janitor::clean_names() %>%
+  mutate(log_beta = log(intercept*tmin))
+
+betas_df
+
+# graph of log_beta 
+
+logbeta_graph = 
+  ggplot(betas_df, aes(x = log_beta, color = log_beta)) +
+  geom_density() 
+
+logbeta_graph
+
+# finding 2.5% and 97.5% quantiles
 
 
 ```
