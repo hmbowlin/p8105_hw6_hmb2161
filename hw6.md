@@ -315,7 +315,7 @@ Model chosen: y = -6246.367 + 32.317babysex + 134.4298head +
 76.376blength + 3.956delwt + 0.6597fincome + 12.039gaweeks + 5.44meight
 + 3.454momage + -53.499mrace + 89.967parity + -2.832ppwt + -3.711smoken
 
-# Problem 2
+# Problem 2: rsquared
 
 ``` r
 # loading in weather dataset
@@ -360,8 +360,42 @@ rsq_df =
       models = map(strap, ~lm(tmax ~ tmin, data = .x) ),
       results = map(models, broom::glance)) %>%
   dplyr::select(results) %>%
-  unnest(results)
-  
+  unnest(results) %>%
+  janitor::clean_names()
+
+# graph of r^2
+
+rsq_plot = 
+  ggplot(rsq_df, aes(x = r_squared)) +
+  geom_density() +
+  labs(
+    x = "R-Squared Value",
+    y = "Density",
+    title = "R-Squared Value Across Bootstrap Samples"
+  )
+
+print(rsq_plot)
+```
+
+<img src="hw6_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+
+``` r
+quantile(pull(rsq_df, r_squared), 0.025)
+```
+
+    ##      2.5% 
+    ## 0.8938343
+
+``` r
+quantile(pull(rsq_df, r_squared), 0.975)
+```
+
+    ##     97.5% 
+    ## 0.9275407
+
+# log beta0\*beta1 graph
+
+``` r
 # drawing bootstrap samples with log beta0*beta1
 ## pivoted wider and mutated to create the log(beta0*beta1) variable by multiplying intercept and tmin together
 
@@ -403,13 +437,30 @@ betas_df
 
 logbeta_graph = 
   ggplot(betas_df, aes(x = log_beta, color = log_beta)) +
-  geom_density() 
+  geom_density()+
+  labs(
+    x = "Log of Beta0*Beta1",
+    y = "Density",
+    title = "Log of Beta0*Beta1 Across Bootstrap Samples"
+  )
 
-logbeta_graph
+print(logbeta_graph)
 ```
 
-<img src="hw6_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+<img src="hw6_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
 
 ``` r
-# finding 2.5% and 97.5% quantiles
+# finding 2.5% and 97.5% quantiles for log_beta
+
+quantile(pull(betas_df, log_beta), 0.025)
 ```
+
+    ##     2.5% 
+    ## 1.965335
+
+``` r
+quantile(pull(betas_df, log_beta), 0.975)
+```
+
+    ##    97.5% 
+    ## 2.058003
