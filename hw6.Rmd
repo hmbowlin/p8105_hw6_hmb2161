@@ -6,6 +6,9 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(MASS)
+library(modelr)
+library(mgcv)
+library(leaps)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -38,22 +41,97 @@ birth_data %>%
 ```
 I loaded the dataset, cleaned it as appropriate data types, and checked for missing values. There are none so I can proceed with analyses.
 
-## linear models
+## stepwise linear model
 
-I am using a stepwise model building process to test what variables are associated with birth weight in my dataset. 
+I am using a stepwise model building process to test what variables are associated with birth weight in my dataset. I 
 
 ```{r}
+set.seed(10)
 # pulling all of my variables into one equation
 model_1 = lm(bwt ~ ., data = birth_data)
 
 # doing a stepwise model selection based on AIC
-model1_step = stepAIC(model_1, direction = "both")
+model1_step = stepAIC(model_1, direction = "both", trace = FALSE) 
 
 # summarizing the above model
-summary(model1_step)
+summary(model1_step) 
+
+# bwt = babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken
 
 # plotting the residuals
 plot(model1_step, scale = "r2")
+
+# plot model residuals against fitted values
+
+birth_data %>%
+  add_predictions(model1_step) %>%
+  add_residuals(model1_step) %>%
+  ggplot(aes(x = pred, y = resid, color = pred)) +
+  geom_point() +
+  viridis::scale_color_viridis(discrete = FALSE) +
+  labs(x = "Predicted Value",
+       y = "Residual",
+       title = "Residual by Predicted Value")
+
+```
+The variables selected into the model are: baby's sex, baby head circumference, baby's length at birth, mother's weight at delivery, family income, gestional age in weeks, mother's height, mother's race, number of live births prior to pregnancy, mother's pre-pregnancy weight, and average number of cigarettes smoked per day during pregnancy.
+
+The residuals demonstrate a slight skew as they are centered to the right, but the cluster itself does not have a distinguishable pattern.
+
+## cross validation
+```{r}
+# model 2 from problem set
+model_2 = lm(bwt ~ blength + gaweeks, data = birth_data) %>%
+  broom::tidy()
+
+# model 3 from problem set
+model_3 = lm(bwt ~ bhead*blength*babysex, data = birth_data) %>%
+  broom::tidy()
+
+# create cross val data frame
+ cross_val = 
+   crossv_mc(birth_data, 100) %>%
+   mutate(
+     train = map(train, as_tibble),
+     test = map(test, as_tibble)
+   )
+
+# actual cross val of the three models to find best model
+crossval = 
+  cross_val %>%
+  mutate(model1_step = map(train, ~lm(bwt ~ ., data = .x) %>%
+                         stepAIC(direction = "both", trace = FALSE)),
+         model_2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+         model_3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*babysex*blength, data = .x))) %>%
+  mutate(rmse_model1_step = map2_dbl(model1_step, test, ~rmse(model = .x, data = .y)),
+         rmse_model_2 = map2_dbl(model_2, test, ~rmse(model = .x, data = .y)),
+         rmse_model_3 = map2_dbl(model_3, test, ~rmse(model = .x, data = .y)))
+
+crossval
+
+# prediction error distribution for each model
+
+crossval %>%
+  pivot_longer(
+    rmse_model1_step:rmse_model_3,
+    names_to = "model",
+    values_to = "rmse",
+    names_prefix = "rmse_") %>%
+  mutate(model = fct_inorder(model)) %>%
+  ggplot(aes(x = model, y = rmse, color = model)) +
+  geom_violin(aes(color = model)) +
+  viridis::scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Model",
+    y = "rmse",
+    title = "Model by Prediction Error Distribution"
+  )
+```
+# Problem 2
+```{r}
+# loading in weather dataset
+
+
 
 ```
 

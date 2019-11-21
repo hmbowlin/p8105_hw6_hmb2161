@@ -62,134 +62,21 @@ birth_data %>%
 I loaded the dataset, cleaned it as appropriate data types, and checked
 for missing values. There are none so I can proceed with analyses.
 
-## linear models
+## stepwise linear model
 
 I am using a stepwise model building process to test what variables are
-associated with birth weight in my dataset.
+associated with birth weight in my dataset. I
 
 ``` r
+set.seed(10)
 # pulling all of my variables into one equation
 model_1 = lm(bwt ~ ., data = birth_data)
 
 # doing a stepwise model selection based on AIC
-model1_step = stepAIC(model_1, direction = "both")
-```
+model1_step = stepAIC(model_1, direction = "both", trace = FALSE) 
 
-    ## Start:  AIC=48810.15
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     malform + menarche + mheight + momage + mrace + parity + 
-    ##     pnumlbw + pnumsga + ppbmi + ppwt + smoken + wtgain
-    ## 
-    ## 
-    ## Step:  AIC=48810.15
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     malform + menarche + mheight + momage + mrace + parity + 
-    ##     pnumlbw + pnumsga + ppbmi + ppwt + smoken
-    ## 
-    ## 
-    ## Step:  AIC=48810.15
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     malform + menarche + mheight + momage + mrace + parity + 
-    ##     pnumlbw + ppbmi + ppwt + smoken
-    ## 
-    ## 
-    ## Step:  AIC=48810.15
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     malform + menarche + mheight + momage + mrace + parity + 
-    ##     ppbmi + ppwt + smoken
-    ## 
-    ##            Df Sum of Sq       RSS   AIC
-    ## - ppbmi     1       315 328372167 48808
-    ## - malform   1      3018 328374870 48808
-    ## - mheight   1     15827 328387679 48808
-    ## - frace     1     33781 328405633 48809
-    ## - ppwt      1     77194 328449045 48809
-    ## <none>                  328371852 48810
-    ## - menarche  1    161362 328533213 48810
-    ## - parity    1    366128 328737979 48813
-    ## - momage    1    632160 329004012 48816
-    ## - fincome   1   1030574 329402426 48822
-    ## - babysex   1   1086475 329458327 48822
-    ## - mrace     1   1778556 330150407 48832
-    ## - smoken    1   3106197 331478048 48849
-    ## - gaweeks   1   5017414 333389265 48874
-    ## - delwt     1   7473440 335845292 48906
-    ## - blength   1 106590743 434962595 50029
-    ## - bhead     1 113902511 442274363 50101
-    ## 
-    ## Step:  AIC=48808.15
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     malform + menarche + mheight + momage + mrace + parity + 
-    ##     ppwt + smoken
-    ## 
-    ##            Df Sum of Sq       RSS   AIC
-    ## - malform   1      3033 328375200 48806
-    ## - frace     1     33825 328405992 48807
-    ## <none>                  328372167 48808
-    ## - menarche  1    161091 328533258 48808
-    ## + ppbmi     1       315 328371852 48810
-    ## - parity    1    366498 328738665 48811
-    ## - momage    1    632022 329004189 48815
-    ## - mheight   1    675684 329047851 48815
-    ## - fincome   1   1030291 329402457 48820
-    ## - babysex   1   1086908 329459074 48820
-    ## - mrace     1   1778610 330150776 48830
-    ## - smoken    1   3105969 331478135 48847
-    ## - ppwt      1   3179601 331551767 48848
-    ## - gaweeks   1   5018627 333390793 48872
-    ## - delwt     1   7474996 335847163 48904
-    ## - blength   1 106590460 434962626 50027
-    ## - bhead     1 113972011 442344178 50100
-    ## 
-    ## Step:  AIC=48806.19
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + 
-    ##     menarche + mheight + momage + mrace + parity + ppwt + smoken
-    ## 
-    ##            Df Sum of Sq       RSS   AIC
-    ## - frace     1     33987 328409187 48805
-    ## <none>                  328375200 48806
-    ## - menarche  1    161625 328536825 48806
-    ## + malform   1      3033 328372167 48808
-    ## + ppbmi     1       330 328374870 48808
-    ## - parity    1    366217 328741417 48809
-    ## - momage    1    634318 329009517 48813
-    ## - mheight   1    674643 329049842 48813
-    ## - fincome   1   1028426 329403626 48818
-    ## - babysex   1   1085480 329460680 48819
-    ## - mrace     1   1780124 330155324 48828
-    ## - smoken    1   3103025 331478225 48845
-    ## - ppwt      1   3188216 331563416 48846
-    ## - gaweeks   1   5016626 333391826 48870
-    ## - delwt     1   7493191 335868391 48902
-    ## - blength   1 106598488 434973688 50025
-    ## - bhead     1 113989429 442364629 50098
-    ## 
-    ## Step:  AIC=48804.64
-    ## bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + 
-    ##     menarche + mheight + momage + mrace + parity + ppwt + smoken
-    ## 
-    ##            Df Sum of Sq       RSS   AIC
-    ## <none>                  328409187 48805
-    ## - menarche  1    165498 328574685 48805
-    ## + frace     1     33987 328375200 48806
-    ## + malform   1      3194 328405992 48807
-    ## + ppbmi     1       376 328408811 48807
-    ## - parity    1    366935 328776121 48807
-    ## - momage    1    637125 329046311 48811
-    ## - mheight   1    683740 329092927 48812
-    ## - fincome   1   1050875 329460062 48817
-    ## - babysex   1   1085276 329494463 48817
-    ## - smoken    1   3092717 331501903 48843
-    ## - ppwt      1   3192334 331601520 48845
-    ## - gaweeks   1   5019197 333428383 48868
-    ## - mrace     1   5999337 334408523 48881
-    ## - delwt     1   7480901 335890088 48900
-    ## - blength   1 106612808 435021995 50023
-    ## - bhead     1 114005059 442414245 50096
-
-``` r
 # summarizing the above model
-summary(model1_step)
+summary(model1_step) 
 ```
 
     ## 
@@ -226,6 +113,8 @@ summary(model1_step)
     ## F-statistic: 821.4 on 13 and 4328 DF,  p-value: < 2.2e-16
 
 ``` r
+# bwt = babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken
+
 # plotting the residuals
 plot(model1_step, scale = "r2")
 ```
@@ -314,3 +203,103 @@ plot(model1_step, scale = "r2")
     ## parameter
 
 <img src="hw6_files/figure-gfm/unnamed-chunk-2-4.png" width="90%" />
+
+``` r
+# plot model residuals against fitted values
+
+birth_data %>%
+  add_predictions(model1_step) %>%
+  add_residuals(model1_step) %>%
+  ggplot(aes(x = pred, y = resid, color = pred)) +
+  geom_point() +
+  viridis::scale_color_viridis(discrete = FALSE) +
+  labs(x = "Predicted Value",
+       y = "Residual",
+       title = "Residual by Predicted Value")
+```
+
+<img src="hw6_files/figure-gfm/unnamed-chunk-2-5.png" width="90%" /> The
+variables selected into the model are: baby’s sex, baby head
+circumference, baby’s length at birth, mother’s weight at delivery,
+family income, gestional age in weeks, mother’s height, mother’s race,
+number of live births prior to pregnancy, mother’s pre-pregnancy weight,
+and average number of cigarettes smoked per day during pregnancy.
+
+The residuals demonstrate a slight skew as they are centered to the
+right, but the cluster itself does not have a distinguishable pattern.
+
+## cross validation
+
+``` r
+# model 2 from problem set
+model_2 = lm(bwt ~ blength + gaweeks, data = birth_data) %>%
+  broom::tidy()
+
+# model 3 from problem set
+model_3 = lm(bwt ~ bhead*blength*babysex, data = birth_data) %>%
+  broom::tidy()
+
+# create cross val data frame
+ cross_val = 
+   crossv_mc(birth_data, 100) %>%
+   mutate(
+     train = map(train, as_tibble),
+     test = map(test, as_tibble)
+   )
+
+# actual cross val of the three models to find best model
+crossval = 
+  cross_val %>%
+  mutate(model1_step = map(train, ~lm(bwt ~ ., data = .x) %>%
+                         stepAIC(direction = "both", trace = FALSE)),
+         model_2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+         model_3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*babysex*blength, data = .x))) %>%
+  mutate(rmse_model1_step = map2_dbl(model1_step, test, ~rmse(model = .x, data = .y)),
+         rmse_model_2 = map2_dbl(model_2, test, ~rmse(model = .x, data = .y)),
+         rmse_model_3 = map2_dbl(model_3, test, ~rmse(model = .x, data = .y)))
+
+crossval
+```
+
+    ## # A tibble: 100 x 9
+    ##    train test  .id   model1_step model_2 model_3 rmse_model1_step
+    ##    <lis> <lis> <chr> <list>      <list>  <list>             <dbl>
+    ##  1 <tib… <tib… 001   <lm>        <lm>    <lm>                273.
+    ##  2 <tib… <tib… 002   <lm>        <lm>    <lm>                291.
+    ##  3 <tib… <tib… 003   <lm>        <lm>    <lm>                278.
+    ##  4 <tib… <tib… 004   <lm>        <lm>    <lm>                294.
+    ##  5 <tib… <tib… 005   <lm>        <lm>    <lm>                268.
+    ##  6 <tib… <tib… 006   <lm>        <lm>    <lm>                284.
+    ##  7 <tib… <tib… 007   <lm>        <lm>    <lm>                268.
+    ##  8 <tib… <tib… 008   <lm>        <lm>    <lm>                273.
+    ##  9 <tib… <tib… 009   <lm>        <lm>    <lm>                268.
+    ## 10 <tib… <tib… 010   <lm>        <lm>    <lm>                271.
+    ## # … with 90 more rows, and 2 more variables: rmse_model_2 <dbl>,
+    ## #   rmse_model_3 <dbl>
+
+``` r
+# prediction error distribution for each model
+
+crossval %>%
+  pivot_longer(
+    rmse_model1_step:rmse_model_3,
+    names_to = "model",
+    values_to = "rmse",
+    names_prefix = "rmse_") %>%
+  mutate(model = fct_inorder(model)) %>%
+  ggplot(aes(x = model, y = rmse, color = model)) +
+  geom_violin(aes(color = model)) +
+  viridis::scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Model",
+    y = "rmse",
+    title = "Model by Prediction Error Distribution"
+  )
+```
+
+<img src="hw6_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" /> \#
+Problem 2
+
+``` r
+# loading in weather dataset
+```
