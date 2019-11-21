@@ -464,3 +464,18 @@ quantile(pull(betas_df, log_beta), 0.975)
 
     ##    97.5% 
     ## 2.058003
+
+The distribution of our \({r}^2\) and
+\(log(\hat{\beta_0}*\hat{\beta_1})\) plots are nearly normally
+distributed. The \({r}^2\) distribution is slightly skewed right, and
+the \(log(\hat{\beta_0}*\hat{\beta_1})\) is slightly more normalized.
+The log transformation distribution is slightly more normalized as a log
+transformation normalizes the distribution.
+
+The 95% confidence interval for the \({r}^2\) values is 0.8938343 to
+0.9275407. The null of zero is not contained, so we are 95% confident
+that the true \({r}^2\) value for our sample lies in this range. The 95%
+confidence interval for the \(log(\hat{\beta_0}*\hat{\beta_1})\) is
+1.9653353 to 2.0580029. The null of zero of not contained, so we are 95%
+confident that the true \(log(\hat{\beta_0}*\hat{\beta_1})\) value for
+our sample lies in this range.
