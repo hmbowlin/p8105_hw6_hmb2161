@@ -297,9 +297,51 @@ crossval %>%
   )
 ```
 
-<img src="hw6_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" /> \#
-Problem 2
+<img src="hw6_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+Given the high interpretability of each of these models, I will look at
+predicted error distributino to choose my model. Based on the violin
+plots above, model 1 provides the lowest predicted error distribution. I
+will choose the stepwise model I created as it has the lowest error, and
+through the stepwise process it has the smallest AIC and biggest log
+likelihood with the fewest number of parameters.
+
+Model chosen: y = \(/beta_0\) + \(\beta_1\)babysex + \(\beta_2\)bhead +
+\(\beta_3\)blength + \(\beta_4\)delwt + \(\beta_5\)fincome +
+\(\beta_6\)gaweeks + \(\beta_7\)meight + \(\beta_8\)momage +
+\(\beta_9\)mrace + \(\beta_10\)parity + \(\beta_11\)ppwt +
+\(\beta_12\)smoken
+
+Model chosen: y = -6246.367 + 32.317babysex + 134.4298head +
+76.376blength + 3.956delwt + 0.6597fincome + 12.039gaweeks + 5.44meight
++ 3.454momage + -53.499mrace + 89.967parity + -2.832ppwt + -3.711smoken
+
+# Problem 2
 
 ``` r
 # loading in weather dataset
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  dplyr::select(name, id, everything())
 ```
+
+    ## Registered S3 method overwritten by 'crul':
+    ##   method                 from
+    ##   as.character.form_file httr
+
+    ## Registered S3 method overwritten by 'hoardr':
+    ##   method           from
+    ##   print.cache_info httr
+
+    ## file path:          /Users/hannahbowlin/Library/Caches/rnoaa/ghcnd/USW00094728.dly
+
+    ## file last updated:  2019-09-26 10:22:50
+
+    ## file min/max dates: 1869-01-01 / 2019-09-30
